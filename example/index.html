@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example test</title>
+    <style>
+        .fail{
+            color:red;
+        }
+
+        .success{
+            color:green;
+        }
+    </style>
+    <script type="application/javascript" src="../src/Krypter.js"></script>
+
+    <script type="text/javascript">
+        var k = new Krypter();
+        var publicJWK, privateJWK, obj = {aa:"bb"}, signature;
+        k.generateKeyPairs(function(daKey){publicJWK = daKey;}, function(daKey){privateJWK = daKey;}, function(){console.log(arguments);});
+
+        //k.sign(obj, privateJWK, 'RSA256',function(s){signature = s;});
+        //k.verify(obj,signature,publicJWK,'RSA256');
+    </script>
+</head>
+<body>
+Message to sign:
+<input type="text" id="tosign"> >> <input type="text" id="signed" readonly="true" /><br>
+<button id="signButton">Sign!</button>
+
+<br />
+<br />
+
+Message to verify:
+<input type="text" id="toverify"><br>
+<button id="verifyButton">Verify!</button>
+<span id="verifiedResult"></span>
+<script>
+    var signedElement = document.getElementById("signed");
+    var tosignElement = document.getElementById("tosign");
+    var toverifyElement = document.getElementById("toverify");
+    var verifiedResult = document.getElementById("verifiedResult");
+
+    function signHandler(e){
+        var tosign = tosignElement.value;
+
+        var signature;
+        k.sign(tosign, privateJWK, 'RSA256', function(s){
+            signature = s;
+            signedElement.value = s;
+        });
+    }
+
+    function verifyHandler(){
+        k.verify(toverifyElement.value, signedElement.value, publicJWK, 'RSA256').then(function(e){
+            if(e){
+                //true
+                verifiedResult.className = "success";
+            }else{
+                verifiedResult.className = "fail";
+            }
+            verifiedResult.innerHTML = e;
+        });
+    }
+
+    document.getElementById("signButton").addEventListener("click", signHandler);
+    document.getElementById("verifyButton").addEventListener("click", verifyHandler);
+</script>
+</body>
+</html>
