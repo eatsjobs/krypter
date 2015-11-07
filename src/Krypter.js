@@ -72,7 +72,7 @@
 			text = JSON.stringify(text);
 		}
 		var self = this;
-		loadKey(JWKPublicKey, "public", algoName).then(function (cryptoKey) {
+		return loadKey(JWKPublicKey, "public", algoName).then(function (cryptoKey) {
 			if (algorithms.hasOwnProperty(algoName)) {
 				return crypto.subtle.verify(algorithms[algoName], cryptoKey, _b64toab(signature), self.str2ab(text));
 			}
