@@ -1,7 +1,7 @@
 {
   "name": "krypterjs",
   "description": "html5 krypter",
-  "main": "krypter.js",
+  "main": "src/krypter.js",
   "authors": [
     "pasquale.mangialavori@gmail.com"
   ],
@@ -9,7 +9,7 @@
   "keywords": [
     "webcrypto"
   ],
-  "moduleType": [],
+  "moduleType": ["globals"],
   "homepage": "",
   "private": true,
   "ignore": [

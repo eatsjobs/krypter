@@ -34,11 +34,14 @@ describe('Krypter Test',function(){
 	});
 
 	it('Import private key in JWK and sign', function(done){
-		krypter.generateKeyPairs(savePublic, savePrivate);
-
+		var saveSignature = function(e){
+			console.log(e, "Signature");
+			expect(e).toBeDefined();
+			done();
+		};
 		var publicJWK;
 		var savePublic = function(pkey){
-			publicJWK = pkey
+			publicJWK = pkey;
 		};
 
 		var privateJWK;
@@ -48,12 +51,7 @@ describe('Krypter Test',function(){
 			console.log("Now sign Object");
 			krypter.sign({chiave:"valore"}, pkey, 'RSA256', saveSignature);
 		};
-
-		var saveSignature = function(e){
-			console.log(e, "Signature");
-			expect(e).toBeDefined();
-			done();
-		};
+		krypter.generateKeyPairs(savePublic, savePrivate);
 	});
 
 	it('Import public key in JWK and verify', function(done){
@@ -67,7 +65,7 @@ describe('Krypter Test',function(){
 
 		var publicJWK;
 		var savePublic = function(pkey){
-			publicJWK = pkey
+			publicJWK = pkey;
 		};
 
 		var saveSignature = function(e){

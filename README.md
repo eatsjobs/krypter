@@ -1,3 +1,11 @@
+# Krypter.js
+A minimal basic class for HTML5 Web Cryptography API
+
+- Sign and verify a text or an Object in RSA algorithm
+- JWK key standard support
+
+For browser support see http://caniuse.com/#feat=cryptography
+
 
 ### Initialize and generate the key pairs
 ```javascript
