@@ -2,16 +2,22 @@
   "name": "krypterjs",
   "version": "1.0.0",
   "description": "html5 krypter",
-  "main": "krypter.js",
+  "main": "src/krypter.js",
   "scripts": {
     "test": "gulp test"
   },
   "author": "pasquale.mangialavori@gmail.com",
   "license": "ISC",
   "devDependencies": {
+    "babel-eslint": "^4.1.4",
+    "eslint": "^1.9.0",
+    "eslint-config-airbnb": "^0.1.0",
+    "eslint-config-airbnb-es5": "^1.0.8",
+    "eslint-plugin-react": "^3.7.1",
     "gulp": "^3.9.0",
     "gulp-util": "^3.0.7",
     "jasmine-core": "^2.3.4",
+    "jsdoc": "^3.3.3",
     "karma": "^0.13.14",
     "karma-chrome-launcher": "^0.2.1",
     "karma-coverage": "^0.5.3",
