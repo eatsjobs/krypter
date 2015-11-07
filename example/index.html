@@ -4,12 +4,29 @@
     <meta charset="UTF-8">
     <title>Example test</title>
     <style>
-        .fail{
+        #verifiedResult.fail{
             color:red;
         }
 
-        .success{
+        #verifiedResult.success{
             color:green;
+        }
+
+        #container{
+            margin:0 auto;
+            width:50%;
+        }
+
+        #container form{
+            text-align: center;
+        }
+
+        #container #verifiedResult{
+            text-transform: uppercase;
+        }
+
+        body{
+            width:100%;
         }
     </style>
     <script type="application/javascript" src="../src/Krypter.js"></script>
@@ -24,17 +41,27 @@
     </script>
 </head>
 <body>
-Message to sign:
-<input type="text" id="tosign"> >> <input type="text" id="signed" readonly="true" /><br>
-<button id="signButton">Sign!</button>
+<div id="container">
 
-<br />
-<br />
+    <form id="signatureForm" action="#">
+        <label for="tosign">Message to Sign:</label>
+        <input type="text" id="tosign">
+        <button id="signButton">Sign!</button>
 
-Message to verify:
-<input type="text" id="toverify"><br>
-<button id="verifyButton">Verify!</button>
-<span id="verifiedResult"></span>
+        <br />
+        <br />
+        <textarea id="signed" rows="5" cols="40"></textarea>
+        <br />
+        <br />
+
+        <label for="toverify">Message to Verify:</label>
+        <input type="text" id="toverify">
+        <button id="verifyButton">Verify!</button>
+        <br/>
+        <span id="verifiedResult"></span>
+    </form>
+
+</div>
 <script>
     var signedElement = document.getElementById("signed");
     var tosignElement = document.getElementById("tosign");
@@ -65,6 +92,7 @@ Message to verify:
 
     document.getElementById("signButton").addEventListener("click", signHandler);
     document.getElementById("verifyButton").addEventListener("click", verifyHandler);
+    document.getElementById("signatureForm").addEventListener("submit", function(e){e.preventDefault();});
 </script>
 </body>
 </html>
