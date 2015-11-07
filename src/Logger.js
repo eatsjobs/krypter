@@ -2,8 +2,7 @@
  * Created by pasquale on 29/10/15.
  */
 
-var Logger;
-Logger = (function (global) {
+(function (global) {
 
 	function Logger(initialLevel) {
 		this.level = initialLevel;
@@ -37,5 +36,5 @@ Logger = (function (global) {
 		this.level = level;
 	};
 
-	return Logger;
+	global.Logger = Logger;
 })(window);
