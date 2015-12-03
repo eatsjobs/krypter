@@ -32,7 +32,8 @@ describe('Krypter Test',function(){
 		Krypter.generateKeyPairs().then(function(keys){
             return Krypter.sign("text", keys[0], "RSA256");
         }).then(function(_signature){
-            signature = _signature;
+            var isBase64 = new RegExp(/^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/).test(_signature);
+            expect(isBase64).toBe(true);
             done();
         });
 	});

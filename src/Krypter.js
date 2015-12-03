@@ -179,7 +179,6 @@
 	function _abtob64(arrayBuffer) {
 		return root.btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
 	}
-    root.abtob64 = _abtob64;
-    root.b64toab = _b64toab;
+
 	root.Krypter = new Krypter;
 })(window);
