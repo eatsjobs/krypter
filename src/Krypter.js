@@ -7,10 +7,11 @@
  */
 (function (root) {
 
-	var RSA256 = {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-256"}}; // must be the same
+	var RSA256 = {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-256"}};
 	var AESalgo = {name: "AES-CBC", length: 128, iv: initialVector};
 
-	var crypto = root.crypto || root.msCrypto || root.crypto.webkitSubtle;
+    var crypto;
+        crypto = root.crypto || root.msCrypto || (root.crypto.webkitSubtle ? crypto.subtle = root.crypto.webkitSublte : null);
 
 	if (crypto === undefined) {
 		throw new Error("HTML5 WebCrypto not supported in this Browser");
@@ -35,26 +36,28 @@
 
 	/**
 	 * The function to sign a textplain or an object
-	 * @memberOf Krypter
 	 * @param {String|Object} text - An object or a string to sign
 	 * @param {JWK} JWKPrivateKey - the jwk private key to load as CryptoKey object
 	 * @param {String} algoName - RSA256 for example or AES128
 	 * @param {Function} saveSignature - the callback to call with the digital base64 signature
 	 */
-	Krypter.prototype.sign = function (text, JWKPrivateKey, algoName, saveSignature) {
-		var saveSignatureDecoratedFn = decorate(saveSignature, _abtob64);
+	Krypter.prototype.sign = function (text, JWKPrivateKey, algoName) {
+		//var saveSignatureDecoratedFn = decorate(saveSignature, _abtob64);
 
 		if (typeof text == "object") {
 			text = JSON.stringify(text);
 		}
 
 		var self = this;
-		loadKey(JWKPrivateKey, "private", algoName).then(function (cryptoKey) {
-			if (algorithms.hasOwnProperty(algoName)) {
-				crypto.subtle.sign(algorithms[algoName], cryptoKey, self.str2ab(text))
-					.then(saveSignatureDecoratedFn);
-			}
-		});
+
+        function s(cryptoKey){
+            if (algorithms.hasOwnProperty(algoName)) {
+                return crypto.subtle.sign(algorithms[algoName], cryptoKey, self.str2ab(text))
+                    .then(_abtob64);
+            }
+        }
+
+		return loadKey(JWKPrivateKey, "private", algoName).then(s);
 	};
 
 	/**
@@ -64,7 +67,7 @@
 	 * @param {ArrayBuffer} signature - the signature to verify
 	 * @param {JWK} JWKPublicKey -
 	 * @param {String} algoName - example RSA256 | AES128
-	 * @returns {Promise} that in success case returns {boolean}
+	 * @returns {Promise} that in success case returns {boolean} the result of verification
 	 */
 	Krypter.prototype.verify = function (text, signature, JWKPublicKey, algoName) {
 
@@ -81,6 +84,7 @@
 
 	/**
 	 * Load key function
+     * @private
 	 * @param {JWK} key - in Javascript Web Key format
 	 * @param {String} privateOrPublic - 'private' and 'public' are the possible values
 	 * @param {String} algoName - the algo label name for example 'RSA256'
@@ -99,41 +103,35 @@
 	}
 
 	/**
-	 * Generate the KeyPair for asymmetric encryption
-	 * @memberOf Krypter
-	 * @param {Function} savePublicKeyFunction -
-	 * @param {Function} savePrivateKeyFunction -
-	 * @param {Function} [onFailFunction] -
+	 * Generate the KeyPairs for asymmetric encryption
+     * @returns {Promise} fullfilled with keys.privateJWK, keys.publicJWK
 	 */
-	Krypter.prototype.generateKeyPairs = function (savePublicKeyFunction, savePrivateKeyFunction, onFailFunction) {
-		arguments[2] == undefined ? arguments[2] = function (e) {
-			throw new Error("Fail to generate keypairs", e.toString());
-		} : arguments[2];
+	Krypter.prototype.generateKeyPairs = function () {
 
-		crypto.subtle.generateKey({
-			name: "RSASSA-PKCS1-v1_5",
-			modulusLength: 2048,
-			publicExponent: new Uint8Array([1, 0, 1]),
-			hash: {name: "SHA-256"}
-		},
-		true,
-		["sign", "verify"])
-		.then(function (keys) {
+        var generator = crypto.subtle.generateKey({
+                name: "RSASSA-PKCS1-v1_5",
+                modulusLength: 2048,
+                publicExponent: new Uint8Array([1, 0, 1]),
+                hash: {name: "SHA-256"}
+            },
+            true,
+            ["sign", "verify"]);
+
+		return generator.then(function (keys) {
 			// Object with exported promises
-			return {
-				private: crypto.subtle.exportKey("jwk", keys.privateKey),
-				public: crypto.subtle.exportKey("jwk", keys.publicKey)
-			};
+			return [
+				crypto.subtle.exportKey("jwk", keys.privateKey),
+				crypto.subtle.exportKey("jwk", keys.publicKey)
+			];
 		}).then(function (exported) {
-			//Save the key in the  JWK format
-			exported.public.then(savePublicKeyFunction, onFailFunction);
-			exported.private.then(savePrivateKeyFunction, onFailFunction);
-		}, onFailFunction);
+            //exported[0] private
+            //exported[1] public
+			return Promise.all(exported);
+		});
 	};
 
 	/**
 	 * Convert ArrayBuffer to String
-	 * @memberOf Krypter
 	 * @param buf {ArrayBuffer}
 	 * @returns {String}
 	 */
@@ -143,22 +141,22 @@
 
 	/**
 	 * Convert String to ArrayBuffer
-	 * @memberOf Krypter
-	 * @param str {String}
+	 * @param {String} str
 	 * @returns {ArrayBuffer}
 	 */
-	Krypter.prototype.str2ab = function (str) {
+	Krypter.prototype.str2ab = function (text) {
 
-		var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+		var buf = new ArrayBuffer(text.length * 2); // 2 bytes for each char
 		var bufView = new Uint16Array(buf);
-		for (var i = 0; i < str.length; i++) {
-			bufView[i] = str.charCodeAt(i);
+		for (var i = 0; i < text.length; i++) {
+			bufView[i] = text.charCodeAt(i);
 		}
 		return buf;
 	};
 
 	/**
 	 * Convert a base64 string to ArrayBuffer
+     * @private
 	 * @param {String} base64 - the string to convert
 	 * @returns {ArrayBuffer}
 	 */
@@ -174,12 +172,14 @@
 
 	/**
 	 * Convert an ArrayBuffer to a base64 String
+     * @private
 	 * @param {ArrayBuffer} ab - the string to convert
 	 * @returns {String}
 	 */
-	function _abtob64(ab) {
-		return root.btoa(String.fromCharCode.apply(null, new Uint8Array(ab)));
+	function _abtob64(arrayBuffer) {
+		return root.btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
 	}
-
-	root.Krypter = Krypter;
+    root.abtob64 = _abtob64;
+    root.b64toab = _b64toab;
+	root.Krypter = new Krypter;
 })(window);
