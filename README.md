@@ -11,27 +11,29 @@ For browser support see http://caniuse.com/#feat=cryptography
 ```javascript
 var publicJWK, //distribute this 
     privateJWK, //sign with this
-    krypter = new Krypter();
 
-krypter.generateKeyPairs(function(daKey){publicJWK = daKey;}, function(daKey){privateJWK = daKey;}, function(){console.log(arguments);});
+
+Krypter.generateKeyPairs().then(function(keys){
+    // keys[1] public
+    // keys[0] private
+}).then(youCanChainHere)
 
 ```
  
 ### Sign an object or a string
 
 ```javascript
-var signature;
-krypter.sign(tosign, privateJWK, 'RSA256', function(s){
-            signature = s;
-});
+
+Krypter.sign("textOrObject", keys[0], "RSA256").then(function(signature){
+    //do somenthing with signature here
+})
 
 ```
 
 ### Verify an object or a string
 
 ```javascript
-var signature;
-krypter.verify(toverify, signature, publicJWK, 'RSA256')
+Krypter.verify(toverify, signature, publicJWK, 'RSA256')
     .then(function(isVerified){
     //isVerified is a boolean
 });
